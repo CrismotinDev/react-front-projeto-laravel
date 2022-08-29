@@ -5,6 +5,9 @@ import type { AppProps } from 'next/app'
 import Head from 'next/head';
 import { ThemeProvider } from '@mui/material';
 import theme from 'ui/themes/theme';
+import Header from 'ui/components/surfaces/Header/Header';
+import Footer from 'ui/components/surfaces/Footer/Footer';
+import { AppContainer } from '@styles/pages/_app.styled';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [myTheme, setMyTheme] = useState(theme);
@@ -17,12 +20,18 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>e-diarista</title>
+        <title>e-diarista {pageProps.title && ` - ${pageProps.title}`}</title>
 
 
       </Head >
       <ThemeProvider theme={theme}>
-        <Component {...pageProps} />
+        <AppContainer>
+          <Header />
+        </AppContainer>
+        <main>
+          <Component {...pageProps} />
+        </main>
+        <Footer />
       </ThemeProvider>
 
     </>
