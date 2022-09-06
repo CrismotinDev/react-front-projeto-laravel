@@ -1,17 +1,40 @@
-import { Button, Typography } from '@mui/material';
-import { Container } from '@mui/system';
 import React from 'react';
+import { Button, Container, Typography, CircularProgress } from '@mui/material';
 import PageTitle from 'ui/components/data-display/PageTitle/PageTitle';
-import UserInformation from 'ui/components/data-display/UserInformation/UserInformation';
 import SafeEnvironment from 'ui/components/feedback/SafeEnvironment/SafeEnvironment';
-import TextFieldMask from 'ui/components/inputs/TextFieldMask/TextFieldMask';
-import { FormElementsContainer, ProfissionaisContainer } from './_verificar-profissionais.styled';
 
-const VerificarProfissionais: React.FC = () => {
+import {
+    FormElementsContainer,
+    ProfissionaisPaper,
+    ProfissionaisContainer,
+} from './_verificar-profissionais.styled';
+import TextFieldMask from 'ui/components/inputs/TextFieldMask/TextFieldMask';
+import UserInformation from 'ui/components/data-display/UserInformation/UserInformation';
+import useVerificarProfissionais from 'data/hooks/pages/useVerificarProfissionais.page';
+
+interface VerificarProfissionaisProps {
+    onContratarProfissional: () => void;
+}
+
+const VerificarProfissionais: React.FC<VerificarProfissionaisProps> = (
+    props
+) => {
+    const {
+        cep,
+        setCep,
+        cepValido,
+        buscarProfissionais,
+        erro,
+        diaristas,
+        buscaFeita,
+        carregando,
+        diaristasRestantes,
+    } = useVerificarProfissionais();
     return (
         <>
             <SafeEnvironment />
-            <PageTitle title={'Conheça os profissionais'}
+            <PageTitle
+                title={'Conheça os profissionais'}
                 subtitle={
                     'Preencha seu endereço e veja todos os profissionais da sua localidade'
                 }
@@ -21,50 +44,68 @@ const VerificarProfissionais: React.FC = () => {
                     <TextFieldMask
                         mask={'99.999-999'}
                         label={'Digite seu CEP'}
-                        fullWidth={true}
+                        fullWidth
+                        value={cep}
+                        onChange={(event) => setCep(event.target.value)}
                     />
-                    <Typography color={'error'}>
-                        CEP não encontrado
-                    </Typography>
-                    <Button variant={'contained'} color={'secondary'} sx={{ width: '220px' }}>
-                        Buscar
+                    {erro && <Typography color={'error'}>{erro}</Typography>}
+
+                    <Button
+                        variant={'contained'}
+                        color={'secondary'}
+                        sx={{ width: '220px' }}
+                    
+                        onClick={() => buscarProfissionais(cep)}
+                    >
+                        {carregando ? <CircularProgress size={20} /> : 'Buscar'}
                     </Button>
                 </FormElementsContainer>
-                <ProfissionaisContainer>
-                    <UserInformation
-                        name={'Cris'}
-                        picture={'https://github.com/CrismotinDev.png'}
-                        rating={3}
-                        description={'São Paulo'}
-                    />
-                    <UserInformation
-                        name={'Cris'}
-                        picture={'https://github.com/CrismotinDev.png'}
-                        rating={3}
-                        description={'São Paulo'}
-                    />
-                    <UserInformation
-                        name={'Cris'}
-                        picture={'https://github.com/CrismotinDev.png'}
-                        rating={3}
-                        description={'São Paulo'}
-                    />
-                    <UserInformation
-                        name={'Cris'}
-                        picture={'https://github.com/CrismotinDev.png'}
-                        rating={3}
-                        description={'São Paulo'}
-                    />
-                </ProfissionaisContainer>
-                <Container>
-                    <Typography variant={'body2'} color={'textSecondary'} sx={{ mt: 5 }}>
-                        ... e mais 50 profissionais atendem ao seu endereço.
-                    </Typography>
-                    <Button variant={'contained'} color={'secondary'} sx={{ mt: 5 }}>
-                        Contratar um(a) profissinal
-                    </Button>
-                </Container>
 
+                {buscaFeita &&
+                    (diaristas.length > 0 ? (
+                        <ProfissionaisPaper>
+                            <ProfissionaisContainer>
+                                {diaristas.map((item, index) => (
+                                    <UserInformation
+                                        key={index}
+                                        name={item.nome_completo}
+                                        picture={item.foto_usuario || ''}
+                                        rating={item.reputacao || 0}
+                                        description={item.cidade}
+                                    />
+                                ))}
+                            </ProfissionaisContainer>
+                            <Container sx={{ textAlign: 'center' }}>
+                                {diaristasRestantes > 0 && (
+                                    <Typography
+                                        variant={'body2'}
+                                        color={'textSecondary'}
+                                        sx={{ mt: 5 }}
+                                    >
+                                        ...e mais {diaristasRestantes}{' '}
+                                        {diaristasRestantes > 1
+                                            ? 'profissionais atendem'
+                                            : 'profissional atende'}{' '}
+                                        ao seu endereço.
+                                    </Typography>
+                                )}
+
+                                <Button
+                                    variant={'contained'}
+                                    color={'secondary'}
+                                    onClick={props.onContratarProfissional}
+                                    sx={{ mt: 5 }}
+                                >
+                                    Contratar um(a) profissional
+                                </Button>
+                            </Container>
+                        </ProfissionaisPaper>
+                    ) : (
+                        <Typography align={'center'} color={'textPrimary'}>
+                            Ainda não temos nenhum(a) diarista disponível em sua
+                            região
+                        </Typography>
+                    ))}
             </Container>
         </>
     );
