@@ -1,11 +1,10 @@
-import axios from 'axios';
+import axios from "axios";
 
-const url = 'http://localhost:8083';
+const url = process.env.NEXT_PUBLIC_API;
 
 export const ApiService = axios.create({
-    baseURL: url,
-    headers: {
-        'Content-Type': 'application/json'
-    }
+  baseURL: url,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
-
